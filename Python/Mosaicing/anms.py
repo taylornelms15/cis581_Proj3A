@@ -1,6 +1,6 @@
 '''
   File name: anms.py
-  Author:
+  Author: Taylor Nelms
   Date created:
 '''
 
