@@ -24,18 +24,44 @@ def feat_desc(img, x, y):
     # x is the column coordinate
     # y is the row coordinate
 
-    # Padding image with zeros to mitigate the effect of interest points near the edges of the image
+    # Mirroring edge pixels to get boundary
     padded_img = img
     r, c = img.shape
-    top = np.zeros((20,c))
 
-    padded_img = np.vstack((top, padded_img))
-    padded_img = np.vstack((padded_img, top))
+    # pad the top
+    temp = np.ones((1,c))
+    for i in range(20):
+        temp = np.vstack((img[i,:], temp))
+    
+    temp = temp[0:20,:]
+    padded_img = np.vstack((temp, padded_img))
 
-    sides = np.zeros((r+40,20))
 
-    padded_img = np.hstack((sides, padded_img))
-    padded_img = np.hstack((padded_img, sides))
+    # Pad the bottom
+    temp = np.ones((1,c))
+    for i in range(r-20,r):
+        temp = np.vstack((img[i,:], temp))
+
+    temp = temp[0:20,:]
+    padded_img = np.vstack((padded_img, temp))
+
+    r, c = padded_img.shape
+    # Pad the left side
+    temp = np.ones((r, 1))
+    for i in range(20):
+        temp = np.hstack((padded_img[:,i].reshape(r,1), temp))
+
+    temp = temp[:,0:20]
+    padded_img = np.hstack((temp, padded_img))
+
+    # Pad the right side
+    temp = np.ones((r, 1))
+    for i in range(c-20, c):
+        temp = np.hstack((padded_img[:,i].reshape(r,1), temp))
+
+    temp = temp[:,0:20]
+    padded_img = np.hstack((padded_img, temp))
+
 
     x = x + 20
     y = y + 20
