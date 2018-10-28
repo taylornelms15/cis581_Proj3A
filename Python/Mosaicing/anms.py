@@ -75,6 +75,9 @@ def anms(cimg, max_pts):
     # Not sure about this.
     rmax = points[0:max_pts][-1][1]
 
+    np.save('temp/x.npy', x)
+    np.save('temp/y.npy', y)
+    np.save('temp/rmax.npy', rmax)
     return x, y, rmax
 
 if __name__ == "__main__":
