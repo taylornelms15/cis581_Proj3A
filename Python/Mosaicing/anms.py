@@ -22,13 +22,6 @@ from corner_detector import corner_detector
 from scipy.spatial import distance
 
 def anms(cimg, max_pts):
-    corners = corner_peaks(cimg)
-
-    if max_pts > corners.shape[0]:
-        # More points than are returned
-        print("Error: Number of corners less than the number of max points")
-        exit(1)
-
     # Keep track of the minimum distance to larger magnitude feature point
     points = list()
 
@@ -40,7 +33,6 @@ def anms(cimg, max_pts):
     h, w = cimg.shape
 
     for i in range(h):
-        print("Working on row {0}".format(i))
         for j in range(w):
             mask = (cimg > .9*cimg[i,j]).astype(int)
             points2comp = cimg*mask
@@ -75,9 +67,6 @@ def anms(cimg, max_pts):
     # Not sure about this.
     rmax = points[0:max_pts][-1][1]
 
-    np.save('temp/x.npy', x)
-    np.save('temp/y.npy', y)
-    np.save('temp/rmax.npy', rmax)
     return x, y, rmax
 
 if __name__ == "__main__":
