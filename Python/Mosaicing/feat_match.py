@@ -33,13 +33,12 @@ def feat_match(descs1, descs2):
     tree = KDTree(descs2.T)
     temp_descs1 = descs1.T
 
-    for i in range(num_points_in_1):
-        # Setting k=2 asks the tree for the two closest neighbors
-        distances, indexes = tree.query(temp_descs1[i], k=2)
+    # Setting k=2 asks the tree for the two closest neighbors
+    distances, indexes = tree.query(temp_descs1, k=2)
 
-        if distances[0] / distances[1] < 0.6:
-            match[i] = indexes[0]
-        # Else, the entry should be -1, which we set as the default above
+    # Vectorized
+    mask = (distances[:,0] / distances[:,1]) < 0.6
+    match[mask] = indexes[:,0][mask]
 
 
 
@@ -59,8 +58,9 @@ if __name__ == "__main__":
     left_cmm = corner_detector(gray_left)
     middle_cmm = corner_detector(gray_middle)
 
-    left_c, left_r, left_rmax = anms(left_cmm, 20)
-    middle_c, middle_r, middle_rmax = anms(middle_cmm, 20)
+    features = 50
+    left_c, left_r, left_rmax = anms(left_cmm, features)
+    middle_c, middle_r, middle_rmax = anms(middle_cmm, features)
 
     # Show the points for the left
     fig, ax = plt.subplots()
@@ -81,3 +81,4 @@ if __name__ == "__main__":
     middle_descs = feat_desc(gray_middle, middle_c, middle_r)
 
     matches = feat_match(left_descs, middle_descs)
+    print(matches)

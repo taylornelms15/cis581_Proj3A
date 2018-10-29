@@ -41,12 +41,10 @@ def anms(cimg, max_pts):
             x, y = np.where(points2comp > 0)
 
             # Get the distance
-            # pairwise = distance.cdist(source, source, 'euclidean')
             distances = np.sqrt(np.power(x-i,2) + np.power(y-j,2))
 
             # Get the minimum
             # The only zero would be when comparing a pixel to itself, so we consider everything else
-            # print("\tlen(distances) = {0}".format(len(distances)))
             if len(distances) == 1:
                 min_dist = 0
             else:
