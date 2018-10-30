@@ -32,20 +32,23 @@ def anms(cimg, max_pts):
     '''
     h, w = cimg.shape
 
+    c = 0.9
     for i in range(h):
+        print("Working on row {0}".format(i))
         for j in range(w):
-            mask = (cimg > .9*cimg[i,j]).astype(int)
-            points2comp = cimg*mask
+            mask = (cimg[i,j] < c*cimg).astype(int)
+            # mask = (cimg > .9*cimg[i,j]).astype(int)
 
             # Get the others
-            x, y = np.where(points2comp > 0)
+            x, y = np.where(mask == 1)
 
             # Get the distance
             distances = np.sqrt(np.power(x-i,2) + np.power(y-j,2))
 
             # Get the minimum
             # The only zero would be when comparing a pixel to itself, so we consider everything else
-            if len(distances) == 1:
+            
+            if len(distances) == 0 or len(distances) == 1:
                 min_dist = 0
             else:
                 min_dist = np.min(distances[distances > 0])
@@ -75,15 +78,16 @@ if __name__ == "__main__":
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
 
     # Get the corner metrics for each pixel
-    corner_metric_matrix = corner_detector(gray_left)
+    cimg = corner_detector(gray_left)
 
-    x, y, rmax = anms(corner_metric_matrix, 10)
+    x, y, rmax = anms(cimg, 1000)
+
     # Plotting corners on the gray scale image
     # corners = corner_peaks(corner_metric_matrix)
-    # fig, ax = plt.subplots()
-    # ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
-    # ax.plot(corners[:,1], corners[:, 0], '+r', markersize=15)
-    # h, w = gray_left.shape
+    fig, ax = plt.subplots()
+    ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    ax.plot(x, y, '.r', markersize=5)
+    h, w = gray_left.shape
 
-    # plt.show()
+    plt.show()
 
