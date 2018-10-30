@@ -1,7 +1,7 @@
 '''
   File name: ransac_est_homography.py
-  Author:
-  Date created:
+  Author: Taylor Nelms
+  Date created: 10/30/2018
 '''
 
 '''
@@ -15,6 +15,76 @@
     - Output inlier_ind: N × 1 vector representing if the correspondence is inlier or not. 1 means inlier, 0 means outlier.
 '''
 
+import numpy as np
+import matplotlib.pyplot as plt
+from est_homography import est_homography
+from scipy.spatial.distance import euclidean
+
+
+
+RSAC_NUM_TRIALS     = 1000
+RSAC_MIN_CONSENSUS  = 10
+RSAC_ERROR_TOL      = 0.5
+
+
 def ransac_est_homography(x1, y1, x2, y2, thresh):
-  # Your Code Here
-  return H, inlier_ind
+
+
+
+
+    return H, inlier_ind
+
+
+def findEightPts(x1, y1, x2, y2, thresh):
+    """
+    @return: Indexes of our best four points, 4x1 array
+    """
+    n = len(x1)
+    
+    isGood = False
+    while not isGood:
+        for t in range(RSAC_NUM_TRIALS):
+            indexes = []
+            while (len(indexex) < 4):
+                x = int(np.random.random() * n)
+                if x not in indexes:
+                    indexes.append(x)
+            #at this point, indexes has 4 random unique numbers in it
+
+
+
+
+
+
+            
+
+
+    #Return: 4 unique indexes for our best set of points
+
+def hFrom8Points(x1, y1, x2, y2):
+    """
+    @param x1: 4 x coordinates for our source points 
+    @param y1: 4 y coordinates for our source points 
+    @param x2: 4 x coordinates for our dest points 
+    @param y2: 4 y coordinates for our dest points 
+    @return: Our 3x3 H matrix
+    """
+
+    return est_homography(x1, y1, x2, y2)
+
+
+def main():
+    pass
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+
+

@@ -14,5 +14,24 @@
 '''
 
 def mymosaic(img_input):
-  # Your Code Here
-  return img_mosaic
+    # Your Code Here
+    return img_mosaic
+
+
+
+
+
+
+
+
+def main():
+
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
