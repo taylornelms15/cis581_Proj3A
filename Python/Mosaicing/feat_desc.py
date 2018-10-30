@@ -85,9 +85,10 @@ if __name__ == "__main__":
     # Convert to grayscale
     gray_left = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    x = np.load('temp/x.npy')
-    y = np.load('temp/y.npy')
-    rmax = np.load('temp/rmax.npy')
+    # Get the corner metrics for each pixel
+    cimg = corner_detector(gray_left)
+
+    x, y, rmax = anms(cimg, 500)
 
     descs = feat_desc(gray_left, x, y)
 

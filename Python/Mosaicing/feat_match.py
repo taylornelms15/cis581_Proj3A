@@ -37,8 +37,10 @@ def feat_match(descs1, descs2):
     distances, indexes = tree.query(temp_descs1, k=2)
 
     # Vectorized
-    mask = (distances[:,0] / distances[:,1]) < 0.6
-    match[mask] = indexes[:,0][mask]
+    ratios = distances[:,0] / distances[:,1]
+    mask = ratios < 0.7
+    num_matches = len(indexes[:,0][mask])
+    match[mask] = indexes[:,0][mask].reshape(num_matches, 1)
 
 
 
@@ -49,7 +51,7 @@ def feat_match(descs1, descs2):
 if __name__ == "__main__":
 
     left = cv2.imread("../test_img/small_1L.jpg")
-    middle = cv2.imread("../test_img/small_1R.jpg")
+    middle = cv2.imread("../test_img/small_1M.jpg")
 
     # Convert to grayscale
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
@@ -58,21 +60,23 @@ if __name__ == "__main__":
     left_cmm = corner_detector(gray_left)
     middle_cmm = corner_detector(gray_middle)
 
-    features = 50
+    features = 1000
     left_c, left_r, left_rmax = anms(left_cmm, features)
     middle_c, middle_r, middle_rmax = anms(middle_cmm, features)
 
     # Show the points for the left
-    fig, ax = plt.subplots()
-    ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
-    ax.plot(left_c, left_r, '+r', markersize=10)
+    # fig, ax = plt.subplots()
+    # ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    # ax.plot(left_c, left_r, 'r.', markersize=5)
 
-    plt.show()
+    # plt.show()
 
-    # Show the points for the left
-    fig, ax = plt.subplots()
-    ax.imshow(gray_middle, origin='upper', cmap=plt.cm.gray)
-    ax.plot(middle_c, middle_r, '+r', markersize=10)
+    # Show the points for the middle
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    ax1.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    ax1.plot(left_c, left_r, 'r.', markersize=5)
+    ax2.imshow(gray_middle, origin='upper', cmap=plt.cm.gray)
+    ax2.plot(middle_c, middle_r, 'r.', markersize=5)
 
     plt.show()
 

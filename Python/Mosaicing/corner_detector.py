@@ -30,10 +30,10 @@ if __name__ == "__main__":
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
 
     # Get the corner metrics for each pixel
-    corner_metric_matrix = corner_detector(gray_left)
+    cimg = corner_detector(gray_left)
 
     # Plotting corners on the gray scale image
-    corners = corner_peaks(corner_metric_matrix)
+    corners = corner_peaks(cimg)
     fig, ax = plt.subplots()
     ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
     ax.plot(corners[:,1], corners[:, 0], '+r', markersize=15)
