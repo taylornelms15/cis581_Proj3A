@@ -22,8 +22,8 @@ from scipy.spatial.distance import euclidean
 
 
 
-RSAC_NUM_TRIALS     = 1000
-RSAC_MIN_CONSENSUS  = 10
+RSAC_NUM_TRIALS     = 10
+RSAC_MIN_CONSENSUS  = 3
 
 
 def ransac_est_homography(x1, y1, x2, y2, thresh):
@@ -31,7 +31,7 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
     @return: Indexes of our best four points
     """
     n = len(x1)
-    print(n)
+#    print(n)
     print(x1)
     print(y1)
     print(x2)
@@ -52,34 +52,48 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
         indexes = np.array(indexes)
         H = hFrom8Points(x1[indexes], y1[indexes], x2[indexes], y2[indexes])
 
-        origIndexes = np.array([x1, y1, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
+        origIndexes = np.array([x2, y2, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
         origIndexes = np.delete(origIndexes, indexes, axis = 0)
 
+
         multByH = np.matmul(H, origIndexes)
-        print(multByH)
 
         multByH = np.delete(multByH, 2, axis = 1)
         multByH = multByH.reshape((n-4, 2)).T
 
-        newx1 = multByH[0]
-        newy1 = multByH[1]
+        newx2 = multByH[0]
+        newy2 = multByH[1]
+        newx1 = np.delete(x1, indexes, axis=0)
+        newy1 = np.delete(y1, indexes, axis=0)
+        print("#"*30)
         print(newx1)
         print(newy1)
+        print(newx2)
+        print(newy2)
 
-        distx = x2 - newx1
-        disty = y2 - newy1
+        distx = newx2 - newx1
+        disty = newy2 - newy1
 
         dist = np.sqrt(distx * distx + disty * disty)
 
         isUnderDist = np.less_equal(dist, thresh)
         goodEnoughCount = np.count_nonzero(isUnderDist)
 
-        if goodEnoughCount > RSAC_MIN_CONSENSUS:
+        print("*************")
+        print(indexes)
+        print(H)
+        print(dist)
+        print(isUnderDist)
+
+#        if goodEnoughCount > RSAC_MIN_CONSENSUS:
+        if True:
             t += 1
-            if goodEnoughCount > bestConsensus:
+            if goodEnoughCount >= bestConsensus:
                 bestH = H
-                bestN = isUnderDict.astype(int)
+                bestN = isUnderDist.astype(int)
                 bestConsensus = goodEnoughCount
+        else:
+            t+=1
 
     
     return bestH, bestN

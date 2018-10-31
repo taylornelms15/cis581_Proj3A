@@ -22,7 +22,7 @@ from feat_desc import feat_desc
 from feat_match import feat_match
 from ransac_est_homography import ransac_est_homography
 
-RSAC_THRESH_VAL = 0.5
+RSAC_THRESH_VAL = 3.0
 
 def mymosaic(img_input):
 
@@ -79,7 +79,20 @@ def mymosaic(img_input):
         ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
         plt.show()
 
-#        hMat.append(ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)) 
+        rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)
+        print(rsac_results)
+        hMat.append(rsac_results)
+        H = rsac_results[0]
+
+        print(H)
+        im2 = cv2.warpPerspective(img_input[1], H, dsize=(800, 800))
+
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[1].imshow(im2, origin="upper", cmap=plt.cm.gray)
+        plt.show()
+
+
 
     print(hMat)
 
@@ -95,8 +108,6 @@ def unityOfMatch(m1, m2):
 
     m1m = ma.masked_values(m1.T[0], -1).astype(int)
     m2m = ma.masked_values(m2.T[0], -1).astype(int)
-    print(m1m)
-    print(m2m)
 
     mid = m1m[m2m]
     whereMatch = np.logical_and(np.equal(m1m[m2m], np.arange(m2m.size)), m2m)
