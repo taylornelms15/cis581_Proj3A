@@ -31,6 +31,11 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
     @return: Indexes of our best four points
     """
     n = len(x1)
+    print(n)
+    print(x1)
+    print(y1)
+    print(x2)
+    print(y2)
 
     bestH = np.zeros((3,3,3))
     bestN = np.zeros(n)
@@ -39,7 +44,7 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
     t = 0
     while t < RSAC_NUM_TRIALS:
         indexes = []
-        while (len(indexex) < 4):
+        while (len(indexes) < 4):
             x = int(np.random.random() * n)
             if x not in indexes:
                 indexes.append(x)
@@ -51,14 +56,17 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
         origIndexes = np.delete(origIndexes, indexes, axis = 0)
 
         multByH = np.matmul(H, origIndexes)
+        print(multByH)
 
         multByH = np.delete(multByH, 2, axis = 1)
-        multByH = multByH.reshape((n, 2)).T
+        multByH = multByH.reshape((n-4, 2)).T
 
         newx1 = multByH[0]
         newy1 = multByH[1]
+        print(newx1)
+        print(newy1)
 
-        dist = np.sqrt(np.sum( ((x2 - newx1) * (x2 - newx1)), ((y2 - newy1) * (y2 - newy1))))
+        dist = np.sqrt(np.sum(np.product((x2 - newx1), (x2 - newx1), axis = 0), np.product((y2 - newy1) , (y2 - newy1), axis = 0)))
 
         isUnderDist = np.less_equal(dist, thresh)
         goodEnoughCount = np.count_nonzero(isUnderDist)
