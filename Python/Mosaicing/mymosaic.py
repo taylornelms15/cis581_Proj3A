@@ -14,6 +14,7 @@
 '''
 import numpy as np
 import numpy.ma as ma
+import matplotlib.pyplot as plt
 import cv2
 from corner_detector import corner_detector
 from anms import anms
@@ -36,22 +37,57 @@ def mymosaic(img_input):
         cimg.append(corner_detector(img))
 
     for c in cimg:
-        aNMS.append(anms(c, 500))
+        aNMS.append(anms(c, 1000))
 
     for i, aN in enumerate(aNMS):
         descs.append(feat_desc(img_input[i], aN[0], aN[1]))
 
     for i in range(len(descs) - 1):
-        fmatchsing.append(feat_match(descs[i], descs[i + 1]))
-        fmatchsing.append(feat_match(descs[i + 1], descs[i]))
+        fDirect = feat_match(descs[i], descs[i + 1])
+        bDirect = feat_match(descs[i + 1], descs[i])
+        m1m = fDirect.T[0][(fDirect.T[0] != -1)].astype(int)
+        m2m = bDirect.T[0][(bDirect.T[0] != -1)].astype(int)
+        print(np.array(m1m))
+        print(np.array(m2m))
+        print("*****************************************")
+        print(aNMS[i][0][m2m])
+        print(aNMS[i][1][m2m])
+        print("*****************************************")
+        print(aNMS[i+1][0][m1m])
+        print(aNMS[i+1][1][m1m])
+
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
+        ax[0].plot(aNMS[i][0][m2m], aNMS[i][1][m2m], '.r',  markersize=5, color='red')
+        ax[1].imshow(img_input[i+1], origin="upper", cmap=plt.cm.gray)
+        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
+        ax[1].plot(aNMS[i+1][0][m1m], aNMS[i+1][1][m1m], '.r',  markersize=5, color='red')
+        plt.show()
+        
+
+        fmatchsing.append(fDirect)
+        fmatchsing.append(bDirect)
 
     for i in range(int(len(fmatchsing) / 2)):
+
+
         srcindexes, dstindexes = unityOfMatch(fmatchsing[2 * i], fmatchsing[2 * i + 1])
         mX1 = aNMS[i][0][srcindexes]
         mY1 = aNMS[i][1][srcindexes]
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
-        hMat.append(ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)) 
+
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
+        ax[0].plot(mX1, mY1, '.r',  markersize=5, color='red')
+        ax[1].imshow(img_input[i+1], origin="upper", cmap=plt.cm.gray)
+        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
+        ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
+        plt.show()
+
+#        hMat.append(ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)) 
 
     print(hMat)
 
@@ -74,7 +110,7 @@ def unityOfMatch(m1, m2):
     whereMatch = np.logical_and(np.equal(m1m[m2m], np.arange(m2m.size)), m2m)
     locOfGoods = np.where(np.logical_and(whereMatch, np.not_equal(m2m, -1)))[0].astype(int)
 
-    return locOfGoods, m2.T[0].astype(int)[locOfGoods]
+    return m2.T[0].astype(int)[locOfGoods], locOfGoods
 
 
 

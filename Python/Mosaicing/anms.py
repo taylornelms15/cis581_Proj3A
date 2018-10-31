@@ -24,6 +24,18 @@ from scipy.spatial import distance
 def anms(cimg, max_pts):
     # Keep track of the minimum distance to larger magnitude feature point
     points = list()
+    """
+    cmax = np.amax(cimg)
+    cmin = np.amin(cimg)
+    vrange = cmax - cmin
+    dimg = cimg - cmin
+    dimg = dimg * 1.0/ vrange
+    dimg *= 255
+    dimg = dimg.astype(int)
+    plt.figure()
+    plt.imshow(dimg)
+    plt.show()
+    """
 
     '''
     For each feature point:
@@ -73,20 +85,28 @@ def anms(cimg, max_pts):
 if __name__ == "__main__":
 
     left = cv2.imread("../test_img/small_1L.jpg")
+    midd = cv2.imread("../test_img/small_1M.jpg")
 
     # Convert to grayscale
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
+    gray_midd = cv2.cvtColor(midd, cv2.COLOR_BGR2GRAY)
 
     # Get the corner metrics for each pixel
-    cimg = corner_detector(gray_left)
+    cimgL = corner_detector(gray_left)
+    cimgM = corner_detector(gray_midd)
 
-    x, y, rmax = anms(cimg, 1000)
+    xL, yL, rmaxL = anms(cimgL, 1000)
+    xM, yM, rmaxM = anms(cimgM, 1000)
 
     # Plotting corners on the gray scale image
     # corners = corner_peaks(corner_metric_matrix)
-    fig, ax = plt.subplots()
-    ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
-    ax.plot(x, y, '.r', markersize=5)
+    plt.figure(1)
+
+    fig, ax = plt.subplots(ncols=2)
+    ax[0].imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    ax[0].plot(xL, yL, '.r', markersize=5)
+    ax[1].imshow(gray_midd, origin='upper', cmap=plt.cm.gray)
+    ax[1].plot(xM, yM, '.r', markersize=5)
     h, w = gray_left.shape
 
     plt.show()
