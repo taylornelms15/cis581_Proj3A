@@ -24,42 +24,56 @@ from scipy.spatial.distance import euclidean
 
 RSAC_NUM_TRIALS     = 1000
 RSAC_MIN_CONSENSUS  = 10
-RSAC_ERROR_TOL      = 0.5
 
 
 def ransac_est_homography(x1, y1, x2, y2, thresh):
-
-
-
-
-    return H, inlier_ind
-
-
-def findEightPts(x1, y1, x2, y2, thresh):
     """
-    @return: Indexes of our best four points, 4x1 array
+    @return: Indexes of our best four points
     """
     n = len(x1)
+
+    bestH = np.zeros((3,3,3))
+    bestN = np.zeros(n)
+    bestConsensus = 0
     
-    isGood = False
-    while not isGood:
-        for t in range(RSAC_NUM_TRIALS):
-            indexes = []
-            while (len(indexex) < 4):
-                x = int(np.random.random() * n)
-                if x not in indexes:
-                    indexes.append(x)
-            #at this point, indexes has 4 random unique numbers in it
+    t = 0
+    while t < RSAC_NUM_TRIALS:
+        indexes = []
+        while (len(indexex) < 4):
+            x = int(np.random.random() * n)
+            if x not in indexes:
+                indexes.append(x)
+        #at this point, indexes has 4 random unique numbers in it
+        indexes = np.array(indexes)
+        H = hFrom8Points(x1[indexes], y1[indexes], x2[indexes], y2[indexes])
+
+        origIndexes = np.array([x1, y1, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
+        origIndexes = np.delete(origIndexes, indexes, axis = 0)
+
+        multByH = np.matmul(H, origIndexes)
+
+        multByH = np.delete(multByH, 2, axis = 1)
+        multByH = multByH.reshape((n, 2)).T
+
+        newx1 = multByH[0]
+        newy1 = multByH[1]
+
+        dist = np.sqrt(np.sum( ((x2 - newx1) * (x2 - newx1)), ((y2 - newy1) * (y2 - newy1))))
+
+        isUnderDist = np.less_equal(dist, thresh)
+        goodEnoughCount = np.count_nonzero(isUnderDist)
+
+        if goodEnoughCount > RSAC_MIN_CONSENSUS:
+            t += 1
+            if goodEnoughCount > bestConsensus:
+                bestH = H
+                bestN = isUnderDict.astype(int)
+                bestConsensus = goodEnoughCount
+
+    
+    return bestH, bestN
 
 
-
-
-
-
-            
-
-
-    #Return: 4 unique indexes for our best set of points
 
 def hFrom8Points(x1, y1, x2, y2):
     """
