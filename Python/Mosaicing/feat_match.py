@@ -17,6 +17,7 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 from scipy.spatial import KDTree
+from pyflann import *
 
 from corner_detector import corner_detector
 from anms import anms
@@ -28,19 +29,27 @@ def feat_match(descs1, descs2):
 
     match = -1*np.ones((num_points_in_1, 1))
 
+
+    flann = FLANN()
+    results, dists = flann.nn(descs2.T, descs1.T, 2, algorithm='kmeans', branching=32, iterations=7, checks=16)
+    ratios = dists[:,0] / dists[:,1]
+    mask = ratios < 0.7
+    num_matches = len(results[:,0][mask])
+    match[mask] = results[:,0][mask].reshape(num_matches, 1)
+
     # Initialize the KDTree
     # Have to transpose because the KDTree expects the points ot be rows, not columns
-    tree = KDTree(descs2.T)
-    temp_descs1 = descs1.T
+    # tree = KDTree(descs2.T)
+    # temp_descs1 = descs1.T
 
     # Setting k=2 asks the tree for the two closest neighbors
-    distances, indexes = tree.query(temp_descs1, k=2)
+    # distances, indexes = tree.query(temp_descs1, k=2)
 
     # Vectorized
-    ratios = distances[:,0] / distances[:,1]
-    mask = ratios < 0.7
-    num_matches = len(indexes[:,0][mask])
-    match[mask] = indexes[:,0][mask].reshape(num_matches, 1)
+    # ratios = distances[:,0] / distances[:,1]
+    # mask = ratios < 0.7
+    # num_matches = len(indexes[:,0][mask])
+    # match[mask] = indexes[:,0][mask].reshape(num_matches, 1)
 
 
 
@@ -72,13 +81,13 @@ if __name__ == "__main__":
     # plt.show()
 
     # Show the points for the middle
-    fig, (ax1, ax2) = plt.subplots(1,2)
-    ax1.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
-    ax1.plot(left_c, left_r, 'r.', markersize=5)
-    ax2.imshow(gray_middle, origin='upper', cmap=plt.cm.gray)
-    ax2.plot(middle_c, middle_r, 'r.', markersize=5)
+    # fig, (ax1, ax2) = plt.subplots(1,2)
+    # ax1.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    # ax1.plot(left_c, left_r, 'r.', markersize=5)
+    # ax2.imshow(gray_middle, origin='upper', cmap=plt.cm.gray)
+    # ax2.plot(middle_c, middle_r, 'r.', markersize=5)
 
-    plt.show()
+    # plt.show()
 
 
     left_descs = feat_desc(gray_left, left_c, left_r)
