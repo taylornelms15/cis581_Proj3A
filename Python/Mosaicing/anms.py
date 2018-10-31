@@ -42,6 +42,7 @@ def anms(cimg, max_pts):
         Find all the feature points with a magnitude more than .9 of the pixel under consideration
         Of the remaining pixels, find the minimum distance 
     '''
+
     h, w = cimg.shape
 
     c = 0.9

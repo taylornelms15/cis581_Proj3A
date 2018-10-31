@@ -18,7 +18,11 @@ import matplotlib.pyplot as plt
 
 
 def corner_detector(img):
-    cimg = corner_harris(img)
+
+    cimg = cv2.cornerHarris(img, 3, 3, 0.04)
+
+
+#    cimg = corner_harris(img)
     return cimg
 
 
