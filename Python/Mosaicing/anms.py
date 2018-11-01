@@ -20,6 +20,7 @@ import cv2
 import matplotlib.pyplot as plt
 from corner_detector import corner_detector
 from scipy.spatial import distance
+from scipy import stats
 
 def anms(cimg, max_pts):
     # Keep track of the minimum distance to larger magnitude feature point

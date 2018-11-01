@@ -22,20 +22,15 @@ from scipy.spatial.distance import euclidean
 
 
 
-RSAC_NUM_TRIALS     = 10
+RSAC_NUM_TRIALS     = 100
 RSAC_MIN_CONSENSUS  = 3
 
 
-def ransac_est_homography(x1, y1, x2, y2, thresh):
+def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
     """
     @return: Indexes of our best four points
     """
     n = len(x1)
-#    print(n)
-    print(x1)
-    print(y1)
-    print(x2)
-    print(y2)
 
     bestH = np.zeros((3,3,3))
     bestN = np.zeros(n)
@@ -51,26 +46,36 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
         #at this point, indexes has 4 random unique numbers in it
         indexes = np.array(indexes)
         H = hFrom8Points(x1[indexes], y1[indexes], x2[indexes], y2[indexes])
+        """
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].imshow(im1, origin='upper')
+        ax[1].imshow(im2, origin='upper')
+        ax[0].plot(x1[indexes], y1[indexes],  markersize=5, color='blue')
+        ax[1].plot(x2[indexes], y2[indexes],  markersize=5, color='blue')
+        """
 
-        origIndexes = np.array([x2, y2, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
+
+        origIndexes = np.array([x1, y1, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
         origIndexes = np.delete(origIndexes, indexes, axis = 0)
 
-
         multByH = np.matmul(H, origIndexes)
+        multByH = np.squeeze(multByH)
+        multByH = multByH[:,:] / multByH[:, [-1]]
+
 
         multByH = np.delete(multByH, 2, axis = 1)
         multByH = multByH.reshape((n-4, 2)).T
 
-        newx2 = multByH[0]
-        newy2 = multByH[1]
-        newx1 = np.delete(x1, indexes, axis=0)
-        newy1 = np.delete(y1, indexes, axis=0)
-        print("#"*30)
-        print(newx1)
-        print(newy1)
-        print(newx2)
-        print(newy2)
+        newx1 = multByH[0]
+        newy1 = multByH[1]
+        newx2 = np.delete(x2, indexes, axis=0)
+        newy2 = np.delete(y2, indexes, axis=0)
+        """
+        ax[1].plot(np.delete(x2, indexes), np.delete(y2, indexes),'.r', markersize=3, color='red')
+        ax[1].plot(newx2, newy2,'.r', markersize=3, color='yellow')
 
+        plt.show()
+        """
         distx = newx2 - newx1
         disty = newy2 - newy1
 
@@ -79,14 +84,8 @@ def ransac_est_homography(x1, y1, x2, y2, thresh):
         isUnderDist = np.less_equal(dist, thresh)
         goodEnoughCount = np.count_nonzero(isUnderDist)
 
-        print("*************")
-        print(indexes)
-        print(H)
-        print(dist)
-        print(isUnderDist)
 
-#        if goodEnoughCount > RSAC_MIN_CONSENSUS:
-        if True:
+        if goodEnoughCount > RSAC_MIN_CONSENSUS:
             t += 1
             if goodEnoughCount >= bestConsensus:
                 bestH = H

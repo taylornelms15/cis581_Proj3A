@@ -9,7 +9,7 @@
     Produce a mosaic by overlaying the pairwise aligned images to create the final mosaic image. If you want to implement
     imwarp (or similar function) by yourself, you should apply bilinear interpolation when you copy pixel values. 
     As a bonus, you can implement smooth image blending of the final mosaic.
-    - Input img_input: M elements numpy array or list, each element is a input image.
+    - Input imgs: M elements numpy array or list, each element is a input image.
     - Outpuy img_mosaic: H × W × 3 matrix representing the final mosaic image.
 '''
 import numpy as np
@@ -21,10 +21,15 @@ from anms import anms
 from feat_desc import feat_desc
 from feat_match import feat_match
 from ransac_est_homography import ransac_est_homography
+from scipy import interpolate
+import math
 
 RSAC_THRESH_VAL = 3.0
 
 def mymosaic(img_input):
+    imgs = []
+    for img in img_input:
+        imgs.append(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
 
     cimg = []
     aNMS = []
@@ -33,14 +38,14 @@ def mymosaic(img_input):
     featMatchesDouble = []
     hMat = []
 
-    for img in img_input:
+    for img in imgs:
         cimg.append(corner_detector(img))
 
     for c in cimg:
-        aNMS.append(anms(c, 800))
+        aNMS.append(anms(c, 1000))
 
     for i, aN in enumerate(aNMS):
-        descs.append(feat_desc(img_input[i], aN[0], aN[1]))
+        descs.append(feat_desc(imgs[i], aN[0], aN[1]))
 
     for i in range(len(descs) - 1):
         fDirect = feat_match(descs[i], descs[i + 1])
@@ -49,10 +54,10 @@ def mymosaic(img_input):
         m2m = bDirect.T[0][(bDirect.T[0] != -1)].astype(int)
         """
         fig, ax = plt.subplots(ncols=2)
-        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
         ax[0].plot(aNMS[i][0][m2m], aNMS[i][1][m2m], '.r',  markersize=5, color='red')
-        ax[1].imshow(img_input[i+1], origin="upper", cmap=plt.cm.gray)
+        ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
         ax[1].plot(aNMS[i+1][0][m1m], aNMS[i+1][1][m1m], '.r',  markersize=5, color='red')
         plt.show()
@@ -69,34 +74,103 @@ def mymosaic(img_input):
         mY1 = aNMS[i][1][srcindexes]
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
-        
+        """ 
         fig, ax = plt.subplots(ncols=2)
-        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
         ax[0].plot(mX1, mY1, '.r',  markersize=5, color='red')
-        ax[1].imshow(img_input[i+1], origin="upper", cmap=plt.cm.gray)
+        ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
         plt.show()
-
-        rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)
+        """
+        rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
         print(rsac_results)
         hMat.append(rsac_results)
         H = rsac_results[0]
 
-        print(H)
-        im2 = cv2.warpPerspective(img_input[1], H, dsize=(800, 800))
-
+        
+        im2 = cv2.warpPerspective(imgs[1], H, dsize=(200, 150))
         fig, ax = plt.subplots(ncols=2)
-        ax[0].imshow(img_input[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[1].imshow(im2, origin="upper", cmap=plt.cm.gray)
         plt.show()
+        
+    #at this point hMat[i] is the left-to-right H-result for that pair
 
+    imIndexes = len(img_input) - 1
+    m = (int)(imIndexes / 2)#floor; 3 images->index 1, 2 images->index 0
+
+    partialImages = []
+
+    hXform = []
+    for result in hMat:
+        hXform.append(result[0])#all the H matrixes
+
+    numAbove = imIndexes - m
+    numBelow = m
+
+    #TODO: handle long chains of H transforms
+
+    intermed1 = stitch(img_input[0], img_input[1], hXform[0])
+    intermed2 = None
+    if len(hXform) > 1:
+        intermed2 = stitch(img_input[2], img_input[1], np.linalg.inv(hXform[1]))
 
 
     print(hMat)
 
     return img_mosaic
+
+def stitch(im1, im2, H):
+
+    h1, w1, d = im1.shape
+    h2, w2, d = im2.shape
+
+    im1Corners = np.array([[0, h1, h1, 0], [0, 0, w1, w1], [1,1,1,1]])
+    im1Corners = im1Corners.T.reshape(4,3,1)
+    print(im1Corners)
+    im1CornersS = np.squeeze(np.matmul(H, im1Corners))
+    im1CornersS = im1CornersS[:, :] / im1CornersS[:, [-1]]
+    print(im1CornersS)
+    im2Corners = np.array([[0, h2, h2, 0], [0, 0, w2, w2], [1,1,1,1]])
+    im2Corners = im2Corners.T.reshape(4,3,1)
+    print(im2Corners)
+    im2CornersS = np.squeeze(np.matmul(np.linalg.inv(H), im2Corners))
+    im2CornersS = im2CornersS[:, :] / im2CornersS[:, [-1]]
+    print(im2CornersS)
+
+
+    posits = np.mgrid[0:w1, 0:h1].reshape(2, w1 * h1)#[x coords, y coords]
+    posits = np.vstack((posits, np.ones(w1 * h1))).T.reshape(w1*h1, 3, 1)
+    print(posits)
+
+    newPosits = np.squeeze(np.matmul(H, posits))
+    newPosits = newPosits[:, :] / newPosits[:, [-1]]
+    newPosits = np.delete(newPosits, 2, axis=1)
+    print(newPosits)
+
+    xmin = np.amin(newPosits[:, :-1])
+    xmax = np.amax(newPosits[:, :-1])
+    ymin = np.amin(newPosits[:,1:])
+    ymax = np.amax(newPosits[:,1:])
+
+    print(xmin)
+    print(xmax)
+    print(ymin)
+    print(ymax)
+
+    xoffset = -1 * int(math.floor(xmin))
+    yoffset = -1 * int(math.floor(ymin))
+
+    newInterp = interpolateImg(np.fliplr(newPosits), im1)
+
+    badwarp = newInterp.reshape((im2.shape[1], im2.shape[0], 3)).astype(int)
+
+    print(badwarp)
+    plt.figure()
+    plt.imshow(badwarp)
+    plt.show()
 
 
 def unityOfMatch(m1, m2):
@@ -115,6 +189,26 @@ def unityOfMatch(m1, m2):
 
     return m2.T[0].astype(int)[locOfGoods], locOfGoods
 
+def interpolateImg(pts, img):
+    """
+    @param pts Nx2 matrix of points (mgrid?)
+    @param img JxIx3 array that is the image
+    @return Nx3, matrix of values at that point (rgb)
+    """
+    chan1 = img[:, :, 0]
+    chan2 = img[:, :, 1]
+    chan3 = img[:, :, 2]
+
+    interp1 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan1, method="linear", bounds_error=False, fill_value=0)
+    interp2 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan2, method="linear", bounds_error=False, fill_value=0)
+    interp3 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan3, method="linear", bounds_error=False,fill_value=0)
+
+    newPts = np.clip(pts, [0,0], [img.shape[0] - 1, img.shape[1] - 1])
+    val1 = interp1(newPts)
+    val2 = interp2(newPts)
+    val3 = interp3(newPts)
+    return np.dstack((val1, val2, val3))
+
 
 
 def main():
@@ -131,12 +225,18 @@ def main():
 
     left = cv2.imread("../test_img/small_1L.jpg")
     middle = cv2.imread("../test_img/small_1M.jpg")
+    right = cv2.imread("../test_img/small_1R.jpg")
 
     # Convert to grayscale
+    """
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
     gray_middle = cv2.cvtColor(middle, cv2.COLOR_BGR2GRAY)
+    gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
+    """
 
-    imgMatrix = [gray_left, gray_middle]
+    imgMatrix = [left, middle]
+#    imgMatrix = [gray_left, gray_middle]
+#    imgMatrix = [gray_left, gray_middle, gray_right]
     print(mymosaic(imgMatrix))
 
 
