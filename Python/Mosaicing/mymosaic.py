@@ -23,8 +23,11 @@ from feat_match import feat_match
 from ransac_est_homography import ransac_est_homography
 from scipy import interpolate
 import math
+import stitcher
+from importlib import reload
+import pdb
 
-RSAC_THRESH_VAL = 3.0
+RSAC_THRESH_VAL = 1.0
 
 def mymosaic(img_input):
     imgs = []
@@ -74,7 +77,7 @@ def mymosaic(img_input):
         mY1 = aNMS[i][1][srcindexes]
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
-        """ 
+        
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
@@ -83,18 +86,19 @@ def mymosaic(img_input):
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
         plt.show()
-        """
+        
         rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
         print(rsac_results)
         hMat.append(rsac_results)
         H = rsac_results[0]
 
-        
+        """ 
         im2 = cv2.warpPerspective(imgs[1], H, dsize=(200, 150))
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[1].imshow(im2, origin="upper", cmap=plt.cm.gray)
         plt.show()
+        """
         
     #at this point hMat[i] is the left-to-right H-result for that pair
 
@@ -112,65 +116,21 @@ def mymosaic(img_input):
 
     #TODO: handle long chains of H transforms
 
-    intermed1 = stitch(img_input[0], img_input[1], hXform[0])
+    while(True):
+        try:
+            pdb.set_trace()
+            reload(stitcher)
+            intermed1 = stitcher.stitch(img_input[0], img_input[1], hXform[0])
+        except Exception as e:
+            print(e)
     intermed2 = None
     if len(hXform) > 1:
-        intermed2 = stitch(img_input[2], img_input[1], np.linalg.inv(hXform[1]))
+        intermed2 = stitcher.stitch(img_input[2], img_input[1], np.linalg.inv(hXform[1]))
 
 
     print(hMat)
 
     return img_mosaic
-
-def stitch(im1, im2, H):
-
-    h1, w1, d = im1.shape
-    h2, w2, d = im2.shape
-
-    im1Corners = np.array([[0, h1, h1, 0], [0, 0, w1, w1], [1,1,1,1]])
-    im1Corners = im1Corners.T.reshape(4,3,1)
-    print(im1Corners)
-    im1CornersS = np.squeeze(np.matmul(H, im1Corners))
-    im1CornersS = im1CornersS[:, :] / im1CornersS[:, [-1]]
-    print(im1CornersS)
-    im2Corners = np.array([[0, h2, h2, 0], [0, 0, w2, w2], [1,1,1,1]])
-    im2Corners = im2Corners.T.reshape(4,3,1)
-    print(im2Corners)
-    im2CornersS = np.squeeze(np.matmul(np.linalg.inv(H), im2Corners))
-    im2CornersS = im2CornersS[:, :] / im2CornersS[:, [-1]]
-    print(im2CornersS)
-
-
-    posits = np.mgrid[0:w1, 0:h1].reshape(2, w1 * h1)#[x coords, y coords]
-    posits = np.vstack((posits, np.ones(w1 * h1))).T.reshape(w1*h1, 3, 1)
-    print(posits)
-
-    newPosits = np.squeeze(np.matmul(H, posits))
-    newPosits = newPosits[:, :] / newPosits[:, [-1]]
-    newPosits = np.delete(newPosits, 2, axis=1)
-    print(newPosits)
-
-    xmin = np.amin(newPosits[:, :-1])
-    xmax = np.amax(newPosits[:, :-1])
-    ymin = np.amin(newPosits[:,1:])
-    ymax = np.amax(newPosits[:,1:])
-
-    print(xmin)
-    print(xmax)
-    print(ymin)
-    print(ymax)
-
-    xoffset = -1 * int(math.floor(xmin))
-    yoffset = -1 * int(math.floor(ymin))
-
-    newInterp = interpolateImg(np.fliplr(newPosits), im1)
-
-    badwarp = newInterp.reshape((im2.shape[1], im2.shape[0], 3)).astype(int)
-
-    print(badwarp)
-    plt.figure()
-    plt.imshow(badwarp)
-    plt.show()
 
 
 def unityOfMatch(m1, m2):
@@ -199,9 +159,9 @@ def interpolateImg(pts, img):
     chan2 = img[:, :, 1]
     chan3 = img[:, :, 2]
 
-    interp1 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan1, method="linear", bounds_error=False, fill_value=0)
-    interp2 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan2, method="linear", bounds_error=False, fill_value=0)
-    interp3 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan3, method="linear", bounds_error=False,fill_value=0)
+    interp1 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan1, method="linear", bounds_error=False, fill_value=0.0)
+    interp2 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan2, method="linear", bounds_error=False, fill_value=0.0)
+    interp3 = interpolate.RegularGridInterpolator((np.arange(img.shape[0]), np.arange(img.shape[1])), chan3, method="linear", bounds_error=False, fill_value=0.0)
 
     newPts = np.clip(pts, [0,0], [img.shape[0] - 1, img.shape[1] - 1])
     val1 = interp1(newPts)
