@@ -26,7 +26,7 @@ RSAC_NUM_TRIALS     = 1000
 RSAC_MIN_CONSENSUS  = 3
 
 
-def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
+def ransac_est_homography(x1, y1, x2, y2, thresh):
     """
     @return: Indexes of our best four points
     """

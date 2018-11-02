@@ -47,8 +47,13 @@ def mymosaic(img_input):
     for img in imgs:
         cimg.append(corner_detector(img))
 
-    for c in cimg:
-        aNMS.append(anms(c, 1000))
+    for i, c in enumerate(cimg):
+        ares = anms(c, 1000)
+        fig, ax = plt.subplots()
+        ax.imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
+        ax.plot(ares[0], ares[1], '.r', markersize=2, color="red")
+        plt.show()
+        aNMS.append(ares)
 
     for i, aN in enumerate(aNMS):
         descs.append(feat_desc(imgs[i], aN[0], aN[1]))
@@ -106,6 +111,7 @@ def mymosaic(img_input):
         ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=2, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=2, color='red')
+        ax[1].set_zorder(-1)
 
         for j in range(len(mX1)):
             con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1],zorder = 0.5)
@@ -113,7 +119,7 @@ def mymosaic(img_input):
 
         plt.show()
         
-        rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
+        rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL)
 
         filtSrc = srcindexes[np.where(rsac_results[1])]
         filtDst = dstindexes[np.where(rsac_results[1])]
@@ -136,6 +142,7 @@ def mymosaic(img_input):
         ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=2, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=2, color='red')
+        ax[1].set_zorder(-1)
         for j in range(len(mX1)):
             con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1], zorder=0.5)
             ax[0].add_patch(con)
