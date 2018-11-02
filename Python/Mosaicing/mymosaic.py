@@ -111,7 +111,6 @@ def mymosaic(img_input):
             con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1],zorder = 0.5)
             ax[0].add_patch(con)
 
-        fig.savefig("bidirec_matches_%s.png" % i)
         plt.show()
         
         rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
@@ -140,7 +139,6 @@ def mymosaic(img_input):
         for j in range(len(mX1)):
             con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1], zorder=0.5)
             ax[0].add_patch(con)
-        fig.savefig("ransac_matches_%s.png" % i)
         plt.show()
 
         """ 
