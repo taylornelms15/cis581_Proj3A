@@ -1,0 +1,83 @@
+\documentclass[10pt]{article}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\graphicspath{{img/}}
+\usepackage{amsmath}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{hyperref}
+\hypersetup{
+	colorlinks=true,
+	linkcolor=blue
+}
+
+
+\begin{document}
+
+\title{\vspace{-2.0cm}Project 3A}
+\author{Taylor Nelms and Nikhil Shenoy}
+\date{\today}
+
+\maketitle
+
+\section{How to Run}
+You can run this project by executing ``python mymosaic.py'' from the command line. The script expects that the images being used for the mosaicing are in a directory one level higher than ``mymosaic.py'' and in a directory called ``test\_img''. If you are in the same directory as ``mymosaic.py'', then the relative path would be ``../test\_img/1L.png''. Place three images in that ``test\_img'' directory.
+
+\section{Image Outputs}
+
+	%% NEED THE COLOR MAP FOR THE CORNER STRENGTH MAP
+	\begin{figure}[h]
+		\caption{corner map}
+		\centering
+		\includegraphics{ANMSl2m.png}
+	\end{figure}
+
+	\begin{figure}[h]
+		\caption{ANMS using the left and middle images}
+		\centering
+		\includegraphics{ANMSl2m.png}
+	\end{figure}
+	
+	\begin{figure}[h]
+		\caption{ANMS using the middle and right images}
+		\centering
+		\includegraphics{ANMSl2m.png}
+	\end{figure}
+
+	\begin{figure}[h]
+		\caption{Post-RANSAC points using the left and middle images}
+		\centering
+		\includegraphics{postRANSACl2m.png}
+	\end{figure}
+	
+	\begin{figure}[h]
+		\caption{Post-RANSAC points using the middle and right images}
+		\centering
+		\includegraphics{postRANSACm2r.png}
+	\end{figure}
+	
+	%% NEED THE CORRECT LINES FROM IMAGE TO IMAGE
+	\begin{figure}[h]
+		\caption{RANSAC lines using the left and middle images}
+		\centering
+		\includegraphics[scale=0.125]{matches_l2m.png}
+	\end{figure}
+	
+	\begin{figure}[h]
+		\caption{RANSAC lines using the middle and right images}
+		\centering
+		\includegraphics[scale=0.125]{matches_m2r.png}
+	\end{figure}
+
+	\begin{figure}[h]
+		\caption{Final panorama}
+		\centering
+		\includegraphics{panorama.png}
+	\end{figure}
+\end{document}
+
+
