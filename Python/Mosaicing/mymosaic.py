@@ -94,6 +94,22 @@ def mymosaic(img_input):
         hMat.append(rsac_results)
         H = rsac_results[0]
 
+        """
+        mX1 = aNMS[i][0][srcindexes][np.where(rsac_results[1])]
+        mY1 = aNMS[i][1][srcindexes][np.where(rsac_results[1])]
+        mX2 = aNMS[i+1][0][dstindexes][np.where(rsac_results[1])]
+        mY2 = aNMS[i+1][1][dstindexes][np.where(rsac_results[1])]
+
+        fig, ax = plt.subplots(ncols=2)
+        ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
+        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
+        ax[0].plot(mX1, mY1, '.r',  markersize=5, color='red')
+        ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
+        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
+        ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
+        plt.show()
+        """
+
         """ 
         im2 = cv2.warpPerspective(imgs[1], H, dsize=(200, 150))
         fig, ax = plt.subplots(ncols=2)

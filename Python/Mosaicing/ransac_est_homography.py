@@ -82,6 +82,10 @@ def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
         dist = np.sqrt(distx * distx + disty * disty)
 
         isUnderDist = np.less_equal(dist, thresh)
+        indexes = np.sort(indexes)
+        for i in range(len(indexes)):
+            isUnderDist = np.insert(isUnderDist, indexes[i], False)
+        isUnderDist = np.insert(isUnderDist, indexes, False)
         goodEnoughCount = np.count_nonzero(isUnderDist)
 
 
