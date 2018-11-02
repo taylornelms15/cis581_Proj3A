@@ -29,7 +29,7 @@ import traceback
 from importlib import reload
 #import pdb
 
-RSAC_THRESH_VAL = 1.0
+RSAC_THRESH_VAL = 3.0
 
 def mymosaic(img_input):
     imgs = []
@@ -80,7 +80,6 @@ def mymosaic(img_input):
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
         
-        """
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
@@ -89,10 +88,9 @@ def mymosaic(img_input):
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
         plt.show()
-        """
         
         rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
-        #print(rsac_results)
+        print(rsac_results)
         hMat.append(rsac_results)
         H = rsac_results[0]
 
