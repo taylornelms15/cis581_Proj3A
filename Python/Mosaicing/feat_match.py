@@ -50,8 +50,11 @@ def feat_match(descs1, descs2):
 
 if __name__ == "__main__":
 
-    left = cv2.imread("../test_img/small_1L.jpg")
-    middle = cv2.imread("../test_img/small_1M.jpg")
+    # left = cv2.imread("../test_img/small_1L.jpg")
+    # middle = cv2.imread("../test_img/small_1M.jpg")
+
+    left = cv2.imread("../test_img/1L.jpg")
+    middle = cv2.imread("../test_img/1M.jpg")
 
     # Convert to grayscale
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
