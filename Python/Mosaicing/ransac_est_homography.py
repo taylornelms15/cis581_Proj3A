@@ -56,12 +56,11 @@ def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
 
 
         origIndexes = np.array([x1, y1, np.ones(n, dtype = float)]).T.reshape((n, 3, 1))
-        origIndexes = np.delete(origIndexes, indexes, axis = 0)
+        origIndexesMod = np.delete(origIndexes, indexes, axis = 0)
 
-        multByH = np.matmul(H, origIndexes)
+        multByH = np.matmul(H, origIndexesMod)
         multByH = np.squeeze(multByH)
         multByH = multByH[:,:] / multByH[:, [-1]]
-
 
         multByH = np.delete(multByH, 2, axis = 1)
         multByH = multByH.reshape((n-4, 2)).T
@@ -85,7 +84,6 @@ def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
         indexes = np.sort(indexes)
         for i in range(len(indexes)):
             isUnderDist = np.insert(isUnderDist, indexes[i], False)
-        isUnderDist = np.insert(isUnderDist, indexes, False)
         goodEnoughCount = np.count_nonzero(isUnderDist)
 
 

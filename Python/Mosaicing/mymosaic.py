@@ -27,6 +27,7 @@ import stitcher
 import sys
 import traceback
 from importlib import reload
+from matplotlib.patches import ConnectionPatch
 #import pdb
 
 RSAC_THRESH_VAL = 3.0
@@ -79,7 +80,8 @@ def mymosaic(img_input):
         mY1 = aNMS[i][1][srcindexes]
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
-        
+
+        """
         if i < 2:
             m = np.zeros((imgs[i].shape[0], 2*imgs[i].shape[1], 3))
             m[0:imgs[i].shape[0], 0: imgs[i].shape[1],:] = cv2.cvtColor(imgs[i], cv2.COLOR_GRAY2RGB)
@@ -89,41 +91,57 @@ def mymosaic(img_input):
 
             offset = imgs[i].shape[1]
             for j in range(len(mX1)):
-                cv2.line(m, (mX1[j], mY1[j]), (mX2[j], offset + mY2[j]), (255,0,0), 2)
+                cv2.line(m, (mY1[j], mX1[j]), (mY2[j], offset + mX2[j]), (255,0,0), 2)
 
             cv2.imwrite("matches_{0}.png".format(i), m)
-
+        """
+        pts1 = np.vstack((mX1, mY1)).T
+        pts2 = np.vstack((mX2, mY2)).T
 
 
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
-        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
-        ax[0].plot(mX1, mY1, '.r',  markersize=5, color='red')
+        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=2, color='blue')
+        ax[0].plot(mX1, mY1, '.r',  markersize=2, color='red')
         ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
-        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
-        ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
+        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=2, color='blue')
+        ax[1].plot(mX2, mY2, '.r', markersize=2, color='red')
+
+        for j in range(len(mX1)):
+            con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1],zorder = 0.5)
+            ax[0].add_patch(con)
+
+        fig.savefig("bidirec_matches_%s.png" % i)
         plt.show()
         
         rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
-        print(rsac_results)
+
+        filtSrc = srcindexes[np.where(rsac_results[1])]
+        filtDst = dstindexes[np.where(rsac_results[1])]
+
+
         hMat.append(rsac_results)
         H = rsac_results[0]
 
-        """
-        mX1 = aNMS[i][0][srcindexes][np.where(rsac_results[1])]
-        mY1 = aNMS[i][1][srcindexes][np.where(rsac_results[1])]
-        mX2 = aNMS[i+1][0][dstindexes][np.where(rsac_results[1])]
-        mY2 = aNMS[i+1][1][dstindexes][np.where(rsac_results[1])]
+        mX1 = aNMS[i][0][filtSrc]
+        mY1 = aNMS[i][1][filtSrc]
+        mX2 = aNMS[i+1][0][filtDst]
+        mY2 = aNMS[i+1][1][filtDst]
+        pts1 = np.vstack((mX1, mY1)).T
+        pts2 = np.vstack((mX2, mY2)).T
 
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
-        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
-        ax[0].plot(mX1, mY1, '.r',  markersize=5, color='red')
+        ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=2, color='blue')
+        ax[0].plot(mX1, mY1, '.r',  markersize=2, color='red')
         ax[1].imshow(imgs[i+1], origin="upper", cmap=plt.cm.gray)
-        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
-        ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
+        ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=2, color='blue')
+        ax[1].plot(mX2, mY2, '.r', markersize=2, color='red')
+        for j in range(len(mX1)):
+            con = ConnectionPatch(pts1[j], pts2[j], "data", "data", axesA=ax[0], axesB=ax[1], zorder=0.5)
+            ax[0].add_patch(con)
+        fig.savefig("ransac_matches_%s.png" % i)
         plt.show()
-        """
 
         """ 
         im2 = cv2.warpPerspective(imgs[1], H, dsize=(200, 150))
