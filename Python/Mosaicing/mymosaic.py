@@ -80,6 +80,21 @@ def mymosaic(img_input):
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
         
+        if i < 2:
+            m = np.zeros((imgs[i].shape[0], 2*imgs[i].shape[1], 3))
+            m[0:imgs[i].shape[0], 0: imgs[i].shape[1],:] = cv2.cvtColor(imgs[i], cv2.COLOR_GRAY2RGB)
+            m[0:imgs[i].shape[0], imgs[i].shape[1]:, :] = cv2.cvtColor(imgs[i+1], cv2.COLOR_GRAY2RGB)
+
+            # color_m = cv2.cvtColor(m, cv2.COLOR_GRAY2RGB)
+
+            offset = imgs[i].shape[1]
+            for j in range(len(mX1)):
+                cv2.line(m, (mX1[j], mY1[j]), (mX2[j], offset + mY2[j]), (255,0,0), 2)
+
+            cv2.imwrite("matches_{0}.png".format(i), m)
+
+
+
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')

@@ -21,6 +21,7 @@ def corner_detector(img):
 
     cimg = cv2.cornerHarris(img, 3, 3, 0.04)
 
+    # cv2.imwrite("corner_color_map.png", cv2.applyColorMap(cimg, cv2.COLORMAP_RAINBOW))
 
 #    cimg = corner_harris(img)
     return cimg
