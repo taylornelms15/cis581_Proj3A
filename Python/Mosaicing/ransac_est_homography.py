@@ -22,8 +22,8 @@ from scipy.spatial.distance import euclidean
 
 
 
-RSAC_NUM_TRIALS     = 100
-RSAC_MIN_CONSENSUS  = 3
+RSAC_NUM_TRIALS     = 1000
+RSAC_MIN_CONSENSUS  = 5
 
 
 def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):

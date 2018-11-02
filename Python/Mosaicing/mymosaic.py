@@ -24,8 +24,10 @@ from ransac_est_homography import ransac_est_homography
 from scipy import interpolate
 import math
 import stitcher
+import sys
+import traceback
 from importlib import reload
-import pdb
+#import pdb
 
 RSAC_THRESH_VAL = 1.0
 
@@ -78,6 +80,7 @@ def mymosaic(img_input):
         mX2 = aNMS[i+1][0][dstindexes]
         mY2 = aNMS[i+1][1][dstindexes]
         
+        """
         fig, ax = plt.subplots(ncols=2)
         ax[0].imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax[0].plot(aNMS[i][0], aNMS[i][1], '.r',  markersize=5, color='blue')
@@ -86,9 +89,10 @@ def mymosaic(img_input):
         ax[1].plot(aNMS[i+1][0], aNMS[i+1][1], '.r', markersize=5, color='blue')
         ax[1].plot(mX2, mY2, '.r', markersize=5, color='red')
         plt.show()
+        """
         
         rsac_results = ransac_est_homography(mX1, mY1, mX2, mY2, RSAC_THRESH_VAL, imgs[i], imgs[i + 1])
-        print(rsac_results)
+        #print(rsac_results)
         hMat.append(rsac_results)
         H = rsac_results[0]
 
@@ -114,23 +118,21 @@ def mymosaic(img_input):
     numAbove = imIndexes - m
     numBelow = m
 
-    #TODO: handle long chains of H transforms
-
-    while(True):
-        try:
-            pdb.set_trace()
-            reload(stitcher)
-            intermed1 = stitcher.stitch(img_input[0], img_input[1], hXform[0])
-        except Exception as e:
-            print(e)
+    #while(True):
+    #pdb.set_trace()
+    #reload(stitcher)
+    intermed1, offset = stitcher.stitch(img_input[0], img_input[1], hXform[0])
+    img_mosaic = intermed1
     intermed2 = None
     if len(hXform) > 1:
-        intermed2 = stitcher.stitch(img_input[2], img_input[1], np.linalg.inv(hXform[1]))
+        intermed2 = stitcher.stitchRR(img_input[2], img_input[1], np.linalg.inv(hXform[1]), offset, intermed1)
+        img_mosaic = intermed2
 
 
-    print(hMat)
-
-    return img_mosaic
+    if(np.amax(img_mosaic) < 2):
+        return img_mosaic
+    else:
+        return img_mosaic.astype(int)
 
 
 def unityOfMatch(m1, m2):
@@ -194,10 +196,14 @@ def main():
     gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
     """
 
-    imgMatrix = [left, middle]
+    imgMatrix = [left, middle, right]
 #    imgMatrix = [gray_left, gray_middle]
 #    imgMatrix = [gray_left, gray_middle, gray_right]
-    print(mymosaic(imgMatrix))
+    results = mymosaic(imgMatrix)
+    plt.figure()
+    plt.imshow(results[:, :, [2, 1, 0]])
+    plt.show()
+#    print(mymosaic(imgMatrix))
 
 
 if __name__ == "__main__":
