@@ -4,7 +4,7 @@
 \DeclarePairedDelimiter\ceil{\lceil}{\rceil}
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
-\usepackage{algpseudocode}
+%\usepackage{algpseudocode}
 \usepackage{graphicx}
 \graphicspath{{img/}}
 \usepackage{amsmath}
@@ -29,48 +29,42 @@ You can run this project by executing ``python mymosaic.py'' from the command li
 
 \section{Image Outputs}
 
-	%% NEED THE COLOR MAP FOR THE CORNER STRENGTH MAP
-	\begin{figure}[h]
-		\caption{corner map}
-		\centering
-		\includegraphics{ANMSl2m.png}
-	\end{figure}
 
 	\begin{figure}[h]
 		\caption{ANMS for the left image}
 		\centering
-		\includegraphics{anmsL.png}
+		\includegraphics{img/anmsL.png}
 	\end{figure}
 	
 	\begin{figure}[h]
 		\caption{ANMS for the middle image}
 		\centering
-		\includegraphics{anmsM.png}
+		\includegraphics{img/anmsM.png}
 	\end{figure}
 
     	\begin{figure}[h]
 		\caption{ANMS for the right image}
 		\centering
-		\includegraphics{anmsR.png}
+		\includegraphics{img/anmsR.png}
 	\end{figure}
         
 	\begin{figure}[h]
 		\caption{Post-RANSAC points using the left and middle images}
 		\centering
-		\includegraphics{postranLM.png}
+		\includegraphics{img/postranLM.png}
 	\end{figure}
 	
 	\begin{figure}[h]
 		\caption{Post-RANSAC points using the middle and right images}
 		\centering
-		\includegraphics{postranMR.png}
+		\includegraphics{img/postranMR.png}
 	\end{figure}
 	
 
 	\begin{figure}[h]
 		\caption{Final panorama}
 		\centering
-		\includegraphics{mosaic.png}
+		\includegraphics{img/mosaic.png}
 	\end{figure}
 \end{document}
 

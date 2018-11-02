@@ -49,10 +49,12 @@ def mymosaic(img_input):
 
     for i, c in enumerate(cimg):
         ares = anms(c, 1000)
+        """
         fig, ax = plt.subplots()
         ax.imshow(imgs[i], origin="upper", cmap=plt.cm.gray)
         ax.plot(ares[0], ares[1], '.r', markersize=2, color="red")
         plt.show()
+        """
         aNMS.append(ares)
 
     for i, aN in enumerate(aNMS):
@@ -241,9 +243,12 @@ def main():
     #middle = cv2.imread("../test_img/small_1M.jpg")
     #right = cv2.imread("../test_img/small_1R.jpg")
 
-    left = cv2.imread("../test_img/1L.jpg")
-    middle = cv2.imread("../test_img/1M.jpg")
-    right = cv2.imread("../test_img/1R.jpg")
+    #left = cv2.imread("../test_img/1L.jpg")
+    #middle = cv2.imread("../test_img/1M.jpg")
+    #right = cv2.imread("../test_img/1R.jpg")
+    left = cv2.imread("../test_img/pano1.jpg")
+    middle = cv2.imread("../test_img/pano2.jpg")
+    right = cv2.imread("../test_img/pano3.jpg")
     # Convert to grayscale
     """
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
