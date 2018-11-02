@@ -38,7 +38,7 @@ def feat_match(descs1, descs2):
 
     # Vectorized
     ratios = distances[:,0] / distances[:,1]
-    mask = ratios < 0.7
+    mask = ratios < 0.95
     num_matches = len(indexes[:,0][mask])
     match[mask] = indexes[:,0][mask].reshape(num_matches, 1)
 

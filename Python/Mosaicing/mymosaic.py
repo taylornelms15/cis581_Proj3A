@@ -183,9 +183,9 @@ def main():
     print(a2[i2])
     """
 
-    # left = cv2.imread("../test_img/small_1L.jpg")
-    # middle = cv2.imread("../test_img/small_1M.jpg")
-    # right = cv2.imread("../test_img/small_1R.jpg")
+    #left = cv2.imread("../test_img/small_1L.jpg")
+    #middle = cv2.imread("../test_img/small_1M.jpg")
+    #right = cv2.imread("../test_img/small_1R.jpg")
 
     left = cv2.imread("../test_img/1L.jpg")
     middle = cv2.imread("../test_img/1M.jpg")
