@@ -23,7 +23,7 @@ from scipy.spatial.distance import euclidean
 
 
 RSAC_NUM_TRIALS     = 1000
-RSAC_MIN_CONSENSUS  = 5
+RSAC_MIN_CONSENSUS  = 3
 
 
 def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
@@ -85,14 +85,11 @@ def ransac_est_homography(x1, y1, x2, y2, thresh, im1, im2):
         goodEnoughCount = np.count_nonzero(isUnderDist)
 
 
-        if goodEnoughCount > RSAC_MIN_CONSENSUS:
-            t += 1
-            if goodEnoughCount >= bestConsensus:
-                bestH = H
-                bestN = isUnderDist.astype(int)
-                bestConsensus = goodEnoughCount
-        else:
-            t+=1
+        if goodEnoughCount >= bestConsensus:
+            bestH = H
+            bestN = isUnderDist.astype(int)
+            bestConsensus = goodEnoughCount
+        t+=1
 
     
     return bestH, bestN
