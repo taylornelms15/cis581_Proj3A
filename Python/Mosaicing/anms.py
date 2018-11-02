@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 from corner_detector import corner_detector
 from scipy.spatial import distance
 from scipy import stats
+import time
 
 def anms(cimg, max_pts):
     # Keep track of the minimum distance to larger magnitude feature point
@@ -45,49 +46,70 @@ def anms(cimg, max_pts):
     '''
 
     h, w = cimg.shape
+    cimg[cimg <= 0] = 0
+    r, c = np.where(cimg > 0)
+    good_points = cimg[cimg > 0]
+    mag_and_index = [(good_points[i], (r[i], c[i])) for i in range(len(good_points))]
+    mag_and_index.sort(key=lambda x: x[0], reverse=True)
+    
+    if len(mag_and_index) >= 30000:
+        # Take the most cornery points
+        mag_and_index = mag_and_index[0:30000]
 
-    c = 0.9
-    for i in range(h):
-        print("Working on row {0}".format(i))
-        for j in range(w):
-            mask = (cimg[i,j] < c*cimg).astype(int)
-            # mask = (cimg > .9*cimg[i,j]).astype(int)
 
-            # Get the others
-            x, y = np.where(mask == 1)
+    mag = np.array([x[0] for x in mag_and_index])
+    x = np.array([x[1][0] for x in mag_and_index])
+    x = x.reshape(len(x),1)
+    y = np.array([x[1][1] for x in mag_and_index])
+    y = y.reshape(len(y),1)
 
-            # Get the distance
-            distances = np.sqrt(np.power(x-i,2) + np.power(y-j,2))
+    index = np.hstack((x,y))
 
-            # Get the minimum
-            # The only zero would be when comparing a pixel to itself, so we consider everything else
-            
-            if len(distances) == 0 or len(distances) == 1:
-                min_dist = 0
-            else:
-                min_dist = np.min(distances[distances > 0])
 
-            # Append a tuple of the pixel coordinates and the min distance to the nearest good feature point
-            points.append(((i,j), min_dist))
+    best_distances = list()
+    print('Starting loop')
+    start = time.time()
+    num_candidates = len(mag_and_index)
+    for i in range(num_candidates):
+        cur_point = index[i]
+        cur_mag = cimg[index[i][0], index[i][1]]
 
+        mag_candidates = mag[cur_mag < 0.9*mag]
+        index_candidates = index[0:mag_candidates.shape[0]]
+
+        if len(mag_candidates) != 0 and len(index_candidates) != 0:
+
+            distances = np.sqrt(np.sum(np.power(index_candidates - cur_point, 2), axis=1))
+
+            best_dist = np.min(distances)
+            best_point = index_candidates[np.argmin(distances)]
+
+            best_distances.append((best_dist, (best_point[0], best_point[1])))
+
+        
 
     # Sort the list in descending order of distance
-    points.sort(key=lambda x: x[1], reverse=True)
+    best_distances.sort(key=lambda x: x[0], reverse=True)
+    end = time.time()
+    print("Elapsed time: {0}".format(end-start))
 
-    top_points = np.array([x[0] for x in points[0:max_pts]])
+    top_points = np.array([x[1] for x in best_distances[0:max_pts]])
     x = top_points[:,1] # Represents column coordinates
     y = top_points[:,0] # Represents row coordinates
 
     # rmax is the minimum distance away the point must be to make it into the corner set
     # Not sure about this.
-    rmax = points[0:max_pts][-1][1]
+    rmax = best_distances[max_pts-1][0]
 
     return x, y, rmax
 
 if __name__ == "__main__":
 
-    left = cv2.imread("../test_img/small_1L.jpg")
-    midd = cv2.imread("../test_img/small_1M.jpg")
+    # left = cv2.imread("../test_img/small_1L.jpg")
+    # midd = cv2.imread("../test_img/small_1M.jpg")
+
+    left = cv2.imread("../test_img/1L.jpg")
+    midd = cv2.imread("../test_img/1M.jpg")
 
     # Convert to grayscale
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
@@ -101,8 +123,6 @@ if __name__ == "__main__":
     xM, yM, rmaxM = anms(cimgM, 1000)
 
     # Plotting corners on the gray scale image
-    # corners = corner_peaks(corner_metric_matrix)
-    plt.figure(1)
 
     fig, ax = plt.subplots(ncols=2)
     ax[0].imshow(gray_left, origin='upper', cmap=plt.cm.gray)
