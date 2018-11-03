@@ -10,3 +10,7 @@ You can run this project by executing ''python mymosaic.py'' from the command li
 
 
 Please note that this project works for stitching strictly three images together.
+
+Potential Packages to Install:
+	- argparse
+	- scipy
