@@ -14,3 +14,7 @@ Please note that this project works for stitching strictly three images together
 Potential Packages to Install:
 	- argparse
 	- scipy
+
+
+Note, in terms of output, that any bits of canvas that aren't filled by image are filled with extensions of the image, rather than black bordering.
+This is a result of the use from RegularGridInterpolator, and is mostly intentional.
