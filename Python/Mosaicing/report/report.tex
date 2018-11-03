@@ -25,14 +25,12 @@
 \maketitle
 
 \section{How to Run}
-	You can run this project by executing ``python mymosaic.py'' from the command line with options that specify the images to be stitched. The script expects that the images being used for the mosaicing are in a directory one level higher than ``mymosaic.py'' and in a directory called ``test\_img''. If you are in the same directory as ``mymosaic.py'', then the relative path would be ``../test\_img/1L.png''. Place three images in that ``test\_img'' directory. To do a nearest neighbors calculation, we used the KDTree from scipy.spatial.
-
-	We use the ``argparse`` module to handle various inputs. These are the available options:
+	You can run this project by executing ``python mymosaic.py'' from the command line with options that specify the images to be stitched. To do a nearest neighbors calculation, we used the KDTree from scipy.spatial. We use the ``argparse`` module to handle various inputs. These are the available options:
 
 	\begin{itemize}
-		\item \textbf{-l}: Speficy the path to the left image.
-		\item \textbf{-m}: Speficy the path to the middle image.
-		\item \textbf{-r}: Speficy the path to the right image.
+		\item \textbf{-l}: Specify the path to the left image.
+		\item \textbf{-m}: Specify the path to the middle image.
+		\item \textbf{-r}: Specify the path to the right image.
 	\end{itemize}
 
 	Please note that this project works for stitching strictly three images together.
