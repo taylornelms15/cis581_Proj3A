@@ -108,28 +108,54 @@ if __name__ == "__main__":
     # left = cv2.imread("../test_img/small_1L.jpg")
     # midd = cv2.imread("../test_img/small_1M.jpg")
 
-    left = cv2.imread("../test_img/1L.jpg")
-    midd = cv2.imread("../test_img/1M.jpg")
+    left = cv2.imread("../test_img/pano1.jpg")
+    midd = cv2.imread("../test_img/pano2.jpg")
+    right = cv2.imread("../test_img/pano3.jpg")
 
     # Convert to grayscale
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
     gray_midd = cv2.cvtColor(midd, cv2.COLOR_BGR2GRAY)
+    gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
 
     # Get the corner metrics for each pixel
     cimgL = corner_detector(gray_left)
     cimgM = corner_detector(gray_midd)
+    cimgR = corner_detector(gray_right)
 
     xL, yL, rmaxL = anms(cimgL, 1000)
     xM, yM, rmaxM = anms(cimgM, 1000)
+    xR, yR, rmaxR = anms(cimgR, 1000)
 
     # Plotting corners on the gray scale image
 
-    fig, ax = plt.subplots(ncols=2)
-    ax[0].imshow(gray_left, origin='upper', cmap=plt.cm.gray)
-    ax[0].plot(xL, yL, '.r', markersize=5)
-    ax[1].imshow(gray_midd, origin='upper', cmap=plt.cm.gray)
-    ax[1].plot(xM, yM, '.r', markersize=5)
-    h, w = gray_left.shape
+    # fig, ax = plt.subplots(ncols=2)
+    # ax[0].imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    # ax[0].plot(xL, yL, '.r', markersize=5)
+    # ax[1].imshow(gray_midd, origin='upper', cmap=plt.cm.gray)
+    # ax[1].plot(xM, yM, '.r', markersize=5)
+    # h, w = gray_left.shape
 
+    # plt.show()
+
+    fig, ax = plt.subplots(ncols=1)
+    ax.imshow(gray_left, origin='upper', cmap=plt.cm.gray)
+    ax.plot(xL, yL, '.r', markersize=5)
     plt.show()
+
+    fig, ax = plt.subplots(ncols=1)
+    ax.imshow(gray_midd, origin='upper', cmap=plt.cm.gray)
+    ax.plot(xM, yM, '.r', markersize=5)
+    plt.show()
+
+    fig, ax = plt.subplots(ncols=1)
+    ax.imshow(gray_right, origin='upper', cmap=plt.cm.gray)
+    ax.plot(xR, yR, '.r', markersize=5)
+    plt.show()
+
+
+
+
+
+
+
 

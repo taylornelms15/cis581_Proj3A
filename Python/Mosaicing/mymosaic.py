@@ -28,7 +28,7 @@ import sys
 import traceback
 from importlib import reload
 from matplotlib.patches import ConnectionPatch
-#import pdb
+import argparse
 
 RSAC_THRESH_VAL = 3.0
 
@@ -227,7 +227,7 @@ def interpolateImg(pts, img):
 
 
 
-def main():
+def main(leftImg, middleImg, rightImg):
     """
     x1 = np.array([-1, 4, 5, -1, 0, 1])
     x2 = np.array([4, -1, -1, 3, -1, 2, 3])
@@ -246,9 +246,9 @@ def main():
     #left = cv2.imread("../test_img/1L.jpg")
     #middle = cv2.imread("../test_img/1M.jpg")
     #right = cv2.imread("../test_img/1R.jpg")
-    left = cv2.imread("../test_img/pano1.jpg")
-    middle = cv2.imread("../test_img/pano2.jpg")
-    right = cv2.imread("../test_img/pano3.jpg")
+    # left = cv2.imread("../test_img/pano1.jpg")
+    # middle = cv2.imread("../test_img/pano2.jpg")
+    # right = cv2.imread("../test_img/pano3.jpg")
     # Convert to grayscale
     """
     gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
@@ -256,7 +256,7 @@ def main():
     gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
     """
 
-    imgMatrix = [left, middle, right]
+    imgMatrix = [leftImg, middleImg, rightImg]
 #    imgMatrix = [gray_left, gray_middle]
 #    imgMatrix = [gray_left, gray_middle, gray_right]
     results = mymosaic(imgMatrix)
@@ -267,7 +267,19 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("-l", "--leftImage", required=True, help="path to the left image")
+    parser.add_argument("-m", "--middleImage", required=True, help="path to the middle image")
+    parser.add_argument("-r", "--rightImage", required=True, help="path to the right image")
+    
+    args = vars(parser.parse_args())
+
+    left = cv2.imread(args['leftImage'])
+    middle = cv2.imread(args['middleImage'])
+    right = cv2.imread(args['rightImage'])
+
+    main(left, middle, right)
 
 
 
