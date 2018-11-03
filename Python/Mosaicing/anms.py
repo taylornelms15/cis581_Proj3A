@@ -67,8 +67,6 @@ def anms(cimg, max_pts):
 
 
     best_distances = list()
-    print('Starting loop')
-    start = time.time()
     num_candidates = len(mag_and_index)
     for i in range(num_candidates):
         cur_point = index[i]
@@ -90,8 +88,6 @@ def anms(cimg, max_pts):
 
     # Sort the list in descending order of distance
     best_distances.sort(key=lambda x: x[0], reverse=True)
-    end = time.time()
-    print("Elapsed time: {0}".format(end-start))
 
     top_points = np.array([x[1] for x in best_distances[0:max_pts]])
     x = top_points[:,1] # Represents column coordinates
